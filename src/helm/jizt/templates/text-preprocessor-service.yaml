@@ -1,0 +1,13 @@
+{{- include "jiztlibchart.service" (list . "jizt.textPreprocessor-service") -}}
+{{- define "jizt.textPreprocessor-service" -}}
+metadata:
+  name: {{ .Values.textPreprocessor.name }}-service
+  labels:
+    microservice: {{ .Values.textPreprocessor.name }}
+spec:
+  selector:
+    microservice: {{ .Values.textPreprocessor.name }}
+  ports:
+  - port: {{ .Values.textPreprocessor.ports.svc }}
+    targetPort: {{ .Values.textPreprocessor.ports.container }}
+{{- end -}}

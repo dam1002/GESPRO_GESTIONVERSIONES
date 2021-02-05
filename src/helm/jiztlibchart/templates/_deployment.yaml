@@ -1,0 +1,43 @@
+# Template for jizt Kubernetes deployments.
+# All keys with values "{}" must be overriden
+# with specific values.
+{{- define "jiztlibchart.deployment.tpl" -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ include "jizt.name" . }}
+    microservice: {}
+    chart: {{ include "jizt.chart" . }}
+    release: "{{ $.Release.Name }}"
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      app: {{ include "jizt.name" . }}
+      microservice: {}
+      release: {{ $.Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "jizt.name" . }}
+        microservice: {}
+        chart: {{ include "jizt.chart" . }}
+        release: {{ $.Release.Name }}
+    spec:
+      containers:
+      - name: {}
+        image: {}
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: {}
+{{- end -}}
+
+
+{{- define "jiztlibchart.deployment" -}}
+{{- include "jiztlibchart.util.merge" (append . "jiztlibchart.deployment.tpl") -}}
+{{- end -}}

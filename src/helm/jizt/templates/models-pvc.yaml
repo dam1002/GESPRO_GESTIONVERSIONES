@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.modelsPV.name }}-pvc
+  labels:
+    app: {{ include "jizt.name" . }}
+    chart: {{ include "jizt.chart" . }}
+    release: "{{ $.Release.Name }}"
+spec:
+  storageClassName: {{ .Values.modelsPV.name }}
+  accessModes:
+  - ReadOnlyMany
+  resources:
+    requests:
+      storage: {{ .Values.modelsPV.capacity.storage }}

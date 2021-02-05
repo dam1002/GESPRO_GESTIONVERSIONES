@@ -1,0 +1,22 @@
+{{- include "jiztlibchart.deployment" (list . "jizt.textPostprocessor-deployment") -}}
+{{- define "jizt.textPostprocessor-deployment" -}}
+metadata:
+  name: {{ .Values.textPostprocessor.name }}-deployment
+  labels:
+    microservice: {{ .Values.textPostprocessor.name }}
+spec:
+  selector:
+    matchLabels:
+      microservice: {{ .Values.textPostprocessor.name }}
+  template:
+    metadata:
+      labels:
+        microservice: {{ .Values.textPostprocessor.name }}
+    spec:
+      containers:
+      - name: {{ .Values.textPostprocessor.name }}
+        image: {{ .Values.textPostprocessor.image }}
+        args: ["-d"]  # uncomment for debug mode
+        ports:
+        - containerPort: {{ .Values.textPostprocessor.ports.container }}
+{{- end -}}

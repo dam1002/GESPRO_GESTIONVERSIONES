@@ -1,0 +1,29 @@
+# Template for jizt Kubernetes services.
+# All keys with values "{}" must be overriden
+# with specific values.
+{{- define "jiztlibchart.service.tpl" -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ include "jizt.name" . }}
+    microservice: {}
+    chart: {{ include "jizt.chart" . }}
+    release: "{{ $.Release.Name }}"
+spec:
+  selector:
+      app: {{ include "jizt.name" . }}
+      microservice: {}
+      release: {{ $.Release.Name }}
+  ports:
+  - protocol: TCP
+    port: {}
+    targetPort: {}
+{{- end -}}
+
+
+{{- define "jiztlibchart.service" -}}
+{{- include "jiztlibchart.util.merge" (append . "jiztlibchart.service.tpl") -}}
+{{- end -}}

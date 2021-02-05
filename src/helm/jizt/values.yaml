@@ -1,0 +1,139 @@
+####################################
+# Kubernetes related configuration #
+####################################
+
+# jizt namespace. All jizt resources
+# will be deployed in this namespace
+namespace: "default"
+
+# Ingress configuration
+# ref: http://kubernetes.io/docs/user-guide/ingress/
+ingress:
+  hostname: "api.jizt.it"
+  paths:
+    v1: "/v1/summaries/*"
+
+# General replica count for ALL the deployments
+replicaCount: 1
+
+# Autoscaling configuration
+# ref: https://kubernetes.io/blog/2016/07/autoscaling-in-kubernetes/
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+
+#######################################
+# Microservices related configuration #
+#######################################
+
+# Configuration for the Dispatcher microservice
+dispatcher:
+  name: "dispatcher"
+  ports:
+    svc: 5000
+    container: 5000
+  image: eu.gcr.io/jizt-299516/dispatcher:0.0.24
+
+# Configuration for Secret containing PostgreSQL user credentials
+postgresSecret:
+  name: postgres-user
+  secretName: pg-dispatcher
+  mountPath: "/etc/postgres"
+
+# Configuration for the Text Preprocessor microservice
+textPreprocessor:
+  name: "text-preprocessing"
+  ports:
+    svc: 5000
+    container: 5000
+  image: eu.gcr.io/jizt-299516/text-preprocessor:0.0.7
+
+# Configuration for the Text Encoder microservice
+t5LargeTextEncoder:
+  name: "t5-large-text-encoding"
+  ports:
+    svc: 5000
+    container: 5000
+  image: eu.gcr.io/jizt-299516/t5-large-text-encoder:0.0.14
+  volumeMounts:
+    mountPath: "/home/text_encoder/models"
+
+# Configuration for the Text Summarizer microservice
+t5LargeTextSummarizer:
+  name: "t5-large-text-summarization"
+  ports:
+    svc: 5000
+    container: 5000
+  image: eu.gcr.io/jizt-299516/t5-large-text-summarizer:0.0.13
+  volumeMounts:
+    mountPath: "/home/text_summarizer/models"
+
+# Configuration for the Text Postprocessor microservice
+textPostprocessor:
+  name: "text-postprocessing"
+  ports:
+    svc: 5000
+    container: 5000
+  image: eu.gcr.io/jizt-299516/text-postprocessor:0.0.4
+
+
+#################################
+# Volumes related configuration #
+#################################
+
+# Configuration for the models StorageClass
+modelsStorageClass:
+  name: models
+  volumeBindingMode: WaitForFirstConsumer
+  allowVolumeExpansion: true
+
+# Configuration for the models PersistentVolume
+modelsPV:
+  name: models
+  capacity:
+    storage: 10Gi
+  pvReclaimPolicy: Retain
+  gcePersistentDisk:
+    pdName: models
+    fsType: ext4
+  csi:
+    driver: pd.csi.storage.gke.io
+    volumeHandle: models  # volume name
+    readOnly: true
+    fsType: ext4
+
+
+###############################
+# Kafka related configuration #
+###############################
+
+# Configuration for Strimzi Kafka cluster
+# ref: https://strimzi.io/docs/operators/master/using.html#proc-config-kafka-str
+kafka:
+  name: "jizt-cluster"
+  namespace: "default"  # not to be confused with strimzi-operator namespace
+  version: 2.6.0
+  replicas: 1
+  resources:
+    memoryRequests: 1Gi
+    memoryLimits: 1Gi
+  config:
+    autoCreateTopics: "false"
+    messageMaxBytes: 1048588  # 1 MiB
+    topicReplicationFactor: 1
+    logReplicationFactor: 1
+    logMinIsr: 1
+    logMessageFormatVersion: "2.6-IV0"
+  zookeeper:
+    replicas: 1
+
+# Global configuration for Kafka topics
+# ref: https://strimzi.io/docs/operators/master/using.html#type-KafkaTopic-reference
+topics:
+  partitions: 1
+  replicas: 1
+  retentionMs: 600000  # 10 minutes

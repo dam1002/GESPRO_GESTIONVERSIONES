@@ -1,0 +1,22 @@
+{{- include "jiztlibchart.deployment" (list . "jizt.textPreprocessor-deployment") -}}
+{{- define "jizt.textPreprocessor-deployment" -}}
+metadata:
+  name: {{ .Values.textPreprocessor.name }}-deployment
+  labels:
+    microservice: {{ .Values.textPreprocessor.name }}
+spec:
+  selector:
+    matchLabels:
+      microservice: {{ .Values.textPreprocessor.name }}
+  template:
+    metadata:
+      labels:
+        microservice: {{ .Values.textPreprocessor.name }}
+    spec:
+      containers:
+      - name: {{ .Values.textPreprocessor.name }}
+        image: {{ .Values.textPreprocessor.image }}
+        args: ["-d"]  # uncomment for debug mode
+        ports:
+        - containerPort: {{ .Values.textPreprocessor.ports.container }}
+{{- end -}}
